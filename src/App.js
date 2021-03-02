@@ -72,12 +72,13 @@ function App() {
     const value = event.target.value;
     setInputValue(value);
     const rowsForFilter = [ ...rows ];
+    setPage(0);
     const result = value === '' ? rows : filterTable(value, rowsForFilter) ;
     setRowsForRender(result)
   };
 
   const filterTable = (value, arr) => {
-    const regV = value;
+    const regV = value.toLowerCase();
     const filterTable = arr.filter((item) => {
       const t = item.name.toLowerCase();
        const result = t.match(regV) ? true : false;
