@@ -3,57 +3,12 @@ import {
   StepBackwardOutlined,
   CaretLeftOutlined,
   CaretRightOutlined,
-  StepForwardOutlined
+  StepForwardOutlined,
+  SearchOutlined
 } from '@ant-design/icons';
+import { rows } from './constants/constants';
 import cn from 'classnames';
 import classes from './App.module.scss';
-
-const createDataItem = (name, calories, proteins, fats, carbs) => (
-  { name, calories, proteins, fats, carbs }
-);
-
-const rows = [
-  createDataItem('Йогурт 1,5%', 65, 4.3, 1.5, 8.4),
-  createDataItem('Йогурт 3,2%', 87, 5, 3.2, 8.9),
-  createDataItem('Молоко 2,5%', 53, 2.8, 2.5, 4.6),
-  createDataItem('Молоко 3,2%', 58, 2.8, 3.2, 4.6),
-  createDataItem('Сметана 15%', 163, 3, 15, 2.9),
-  createDataItem('Сметана 20%', 209, 3, 20, 2.9),
-  createDataItem('Мoлоко сгущенное', 139, 9, 4.6, 72.8),
-  createDataItem('Сыр "Адыгейский"', 226, 19, 16, 1.5),
-  createDataItem('Сыр брынза', 262, 22.1, 19.2, 0.4),
-  createDataItem('Сыр голладский', 370, 26.8, 27.4, 0),
-  createDataItem('Сыр российский', 371, 23.4, 30, 0),
-  createDataItem('Сыр плавленый', 226, 24, 13.5, 0),
-  createDataItem('Творог обезжиренный', 86, 18, 0.6, 1.5),
-  createDataItem('Геркулес', 355, 13.1, 6.2, 65.7),
-  createDataItem('Гречневая крупа', 329, 12.6, 2.6, 68),
-  createDataItem('Манная крупа', 326, 11.3, 0.7, 73.3),
-  createDataItem('Перловая крупа', 324, 9.3, 1.1, 73.7),
-  createDataItem('Рис', 323, 7, 0.6, 73.7),
-  createDataItem('Фасоль', 309, 22.3, 1.7, 54.5),
-  createDataItem('Соя', 395, 34.9, 17.3, 26.5),
-  createDataItem('Чечевица', 310, 24.8, 1.1, 53.7),
-  createDataItem('Баклажаны', 24, 0.6, 0.1, 5.5),
-  createDataItem('Капуста', 28, 1.8, 0, 5.4),
-  createDataItem('Картофель', 83, 2, 0.1, 19.7),
-  createDataItem('Морковь', 33, 1.3, 0.1, 7),
-  createDataItem('Томаты', 19, 0.6, 0, 4.2),
-  createDataItem('Огурцы', 15, 0.8, 0, 3),
-  createDataItem('Перец сладкий', 23, 1.3, 0, 4.7),
-  createDataItem('Ананас', 48, 0.4, 0, 11.8),
-  createDataItem('Апельсин', 38, 0.9, 0, 8.4),
-  createDataItem('Банан', 91, 1.5, 0, 22.4),
-  createDataItem('Виноград', 69, 0.4, 0, 17.5),
-  createDataItem('Мандарин', 38, 0.8, 0, 8.6),
-  createDataItem('Яблоки', 46, 0.4, 0, 11.3),
-  createDataItem('Арахис', 548, 26.3, 45.2, 9.7),
-  createDataItem('Грецкий орех', 648, 13.8, 61.3, 10.2),
-  createDataItem('Миндаль', 645, 18.6, 57.7, 13.6),
-  createDataItem('Фундук', 704, 16.1, 66.9, 9.9),
-  createDataItem('Курага', 272, 5.2, 0, 65.9),
-
-];
 
 const columnsNames = [
   { name: 'Название продукта', id: 'name' },
@@ -65,12 +20,13 @@ const columnsNames = [
 
 function App() {
 
-  const selectOptions = ['10', '25', '50'];
+  const selectOptions = ['15', '25', '50'];
   const count = rows.length;
 
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [rowsPerPage, setRowsPerPage] = useState(15);
   const [page, setPage] = useState(0);
   const [rowsForRender, setRowsForRender] = useState(rows);
+  const [inputValue, setInputValue] = useState('');
 
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value), 10);
@@ -99,8 +55,8 @@ function App() {
 
   const handleClickSort = (event) => {
     const id = event.target.id;
-    const sortRows = [...rowsForRender];
-    const result = sortByColumnsName(id, sortRows);
+    const rowsForSort = [...rowsForRender];
+    const result = sortByColumnsName(id, rowsForSort);
     setRowsForRender(result)
   };
 
@@ -112,6 +68,24 @@ function App() {
     return arr
   };
 
+  const handleChangeSearch = (event) => {
+    const value = event.target.value;
+    setInputValue(value);
+    const rowsForFilter = [ ...rows ];
+    const result = value === '' ? rows : filterTable(value, rowsForFilter) ;
+    setRowsForRender(result)
+  };
+
+  const filterTable = (value, arr) => {
+    const regV = value;
+    const filterTable = arr.filter((item) => {
+      const t = item.name.toLowerCase();
+       const result = t.match(regV) ? true : false;
+      return result
+    })
+    return filterTable
+  };
+
   return (
     <div className={classes.container}>
       <div className={classes.table}>
@@ -121,8 +95,8 @@ function App() {
           ))}
         </div>
         <div className={classes.tableBody}>
-          {rowsForRender.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
-            <div className={classes.tableRow} key={row.name}>
+          {rowsForRender.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
+            <div className={classes.tableRow} key={row.name + index}>
               <div><p>{row.name}</p></div>
               <div><p>{row.calories}</p></div>
               <div><p>{row.proteins}</p></div>
@@ -132,6 +106,15 @@ function App() {
           ))}
         </div>
         <div className={classes.tablePagination}>
+          <div>
+            <SearchOutlined />
+            <input 
+              type='text'
+              placeholder='Поиск по названию продукта'
+              onInput={handleChangeSearch}
+              value={inputValue}
+            />
+          </div>
           <div>
             <p>Строк на странице:&nbsp;</p>
             <select
