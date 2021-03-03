@@ -18,15 +18,16 @@ const columnsNames = [
   { name: 'Углеводы, г', id: 'carbs' }
 ];
 
+const selectOptions = ['15', '25', '50'];
+
 function App() {
-
-  const selectOptions = ['15', '25', '50'];
-  const count = rows.length;
-
-  const [rowsPerPage, setRowsPerPage] = useState(15);
+  const [rowsPerPage, setRowsPerPage] = useState(15); 
   const [page, setPage] = useState(0);
   const [rowsForRender, setRowsForRender] = useState(rows);
-  const [inputValue, setInputValue] = useState('');
+  const [inputValue, setInputValue] = useState(''); 
+  const [headIsClick, setHeadIsClick] = useState(false); 
+
+  const count = rowsForRender.length;
 
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value), 10);
@@ -55,8 +56,11 @@ function App() {
 
   const handleClickSort = (event) => {
     const id = event.target.id;
+    setHeadIsClick(!headIsClick);
     const rowsForSort = [...rowsForRender];
-    const result = sortByColumnsName(id, rowsForSort);
+    const result = headIsClick 
+      ? sortByColumnsName(id, rowsForSort).reverse() 
+      : sortByColumnsName(id, rowsForSort);
     setRowsForRender(result)
   };
 
@@ -92,18 +96,25 @@ function App() {
       <div className={classes.table}>
         <div className={cn(classes.tableRow, classes.tableHead)}>
           {columnsNames.map((item, index) => (
-            <div key={item.id + index}><button id={item.id} onClick={handleClickSort}>{item.name}</button></div>
+            <button 
+              key={item.id + index} 
+              id={item.id} onClick={handleClickSort}
+            >
+              {item.name}
+            </button>
           ))}
         </div>
         <div className={classes.tableBody}>
-          {rowsForRender.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
-            <div className={classes.tableRow} key={row.name + index}>
-              <div><p>{row.name}</p></div>
-              <div><p>{row.calories}</p></div>
-              <div><p>{row.proteins}</p></div>
-              <div><p>{row.fats}</p></div>
-              <div><p>{row.carbs}</p></div>
-            </div>
+          {rowsForRender
+            .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+            .map((row, index) => (
+              <div className={classes.tableRow} key={row.name + index}>
+                <div><p>{row.name}</p></div>
+                <div><p>{row.calories}</p></div>
+                <div><p>{row.proteins}</p></div>
+                <div><p>{row.fats}</p></div>
+                <div><p>{row.carbs}</p></div>
+              </div>
           ))}
         </div>
         <div className={classes.tablePagination}>
